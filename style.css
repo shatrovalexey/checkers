@@ -25,10 +25,19 @@
 	animation-direction: alternate ;
 	*/
 }
+.board.settings {
+	position: absolute ;
+	border: 1px black solid ;
+	padding: 10px ;
+	left: 65% ;
+	top: 10% ;
+}
+.board.settings .player-count {
+}
 .error {
 	filter: blur( 5px ) brightness(3%) ;
 }
-.advised {
+.cell.advised {
 	outline: 4px #ff00ff dotted ;
 }
 .cell {
@@ -50,7 +59,13 @@
 .cell[data-color="1"] {
 	background-color: #c7c9b8 ;
 }
-.cell:not([data-player="0"]):hover {
+.cell:not(.player-current):not([data-player="0"]) {
+	cursor: not-allowed ;
+}
+.cell.player-current {
+	filter: drop-shadow(5px 5px 4px #cc0000);
+}
+.cell.player-current:hover {
 	outline: 4px blue dotted ;
 }
 .cell[data-player="1"] {

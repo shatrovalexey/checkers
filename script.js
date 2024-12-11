@@ -5,15 +5,53 @@
 
 	let [ playerCurrent , ] = players ;
 
-	const setNextPlayer = ( ) => {
-		const idx = players.indexOf( playerCurrent ) ;
-
-		return [ playerCurrent , ] = idx < players.length - 1 ? [ players[ idx + 1 ] , ] : players ;
-	} ;
-
 	doc.addEventListener( "DOMContentLoaded" , evt => {
 		const board = doc.querySelector( ".board" ) ;
 		const cell = board.querySelector( ".cell.template" ) ;
+		const settings = board.querySelector( ".settings" ) ;
+
+		const setNextPlayerChange = bool => {
+			const cellMouseOver = ( { "target" : cellCurrent , } ) => {
+				if ( cellCurrent.dataset.player == 0 ) {
+					return ;
+				}
+
+				getStepsNearest( cellCurrent ).forEach( cellCurrent => cellCurrent.classList.add( "advised" ) ) ;
+			} ;
+
+			const cellMouseOut = ( { "target" : cellCurrent , } ) => board
+						.querySelectorAll( ".advised" ).forEach( cellCurrent => cellCurrent.classList.remove( "advised" ) ) ;
+
+			board.querySelectorAll( ".cell" )
+				.forEach( cellCurrent => {
+					cellCurrent.classList.remove( "player-current" ) ;
+
+					[ [ "mouseover" , cellMouseOver , ] , [ "mouseout" , cellMouseOut , ] , ]
+						.forEach( ( [ eventType , eventCall , ] ) => cellCurrent.removeEventListener( eventType , eventCall ) ) ;
+				} ) ;
+
+			board.querySelectorAll( `.cell[data-player='${playerCurrent}']` )
+				.forEach( cellCurrent => {
+					if ( bool ) {
+						cellCurrent.classList.add( "player-current" ) ;
+					}
+
+					[ [ "mouseover" , cellMouseOver , ] , [ "mouseout" , cellMouseOut , ] , ]
+						.forEach( ( [ eventType , eventCall , ] ) => cellCurrent.addEventListener( eventType , eventCall ) ) ;
+				} ) ;
+		} ;
+
+		const setNextPlayer = ( ) => {
+			setNextPlayerChange( false ) ;
+
+			const idx = players.indexOf( playerCurrent ) ;
+
+			[ playerCurrent , ] = idx < players.length - 1 ? [ players[ idx + 1 ] , ] : players ;
+
+			setNextPlayerChange( true ) ;
+
+			return playerCurrent ;
+		} ;
 
 		boardMatrix.forEach( ( boardLine , y ) => boardLine.forEach( ( boardCell , x ) => {
 			const cellCurrent = cell.cloneNode( true ) ;
@@ -31,8 +69,9 @@
 			}
 		} ) ) ;
 
-		const getStepsAll = ( ) => board.querySelectorAll( ".checked" ) ;
+		setNextPlayerChange( true ) ;
 
+		const getStepsAll = ( ) => board.querySelectorAll( ".checked" ) ;
 		const getSteps = stepsCurrent => {
 			if ( stepsCurrent.length < 2 ) {
 				return ;
@@ -192,19 +231,6 @@
 		} ) ;
 		board.querySelectorAll( ".cell[data-color='0']:not(.template)" )
 			.forEach( cellCurrent => {
-				cellCurrent.addEventListener( "mouseover" , ( { "target" : cellCurrent , } ) => {
-					if ( cellCurrent.dataset.player == 0 ) {
-						return true ;
-					}
-
-					const cellsNearest = getStepsNearest( cellCurrent ) ;
-
-					cellsNearest.forEach( cellCurrent => cellCurrent.classList.add( "advised" ) ) ;
-				} ) ;
-				cellCurrent.addEventListener( "mouseout" , ( { "target" : cellCurrent , } ) => {
-					board.querySelectorAll( ".advised" ).forEach( cellCurrent => cellCurrent.classList.remove( "advised" ) ) ;
-				});
-
 				cellCurrent.addEventListener( "click" , ( { "target" : cellCurrent , } ) => {
 					const cellsCurrent = board.querySelectorAll( ".checked" ) ;
 
